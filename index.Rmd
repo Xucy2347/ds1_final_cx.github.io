@@ -4,4 +4,4 @@ title: "DSI_final_cx!"
 
 ### Shiny?
 
-[summary]()
+[summary](dashboard/shiny_MeteorSumm.html)

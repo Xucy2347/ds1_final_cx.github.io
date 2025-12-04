@@ -7,13 +7,9 @@ output:
     vertical_layout: fill
 runtime: shiny
 resource_files:
-  - dashboard/df_gen/data/NYcounty_fips/*
-  - dashboard/df_gen/data/meteor_2016to20_NY.csv
+  - data/NYcounty_fips/*
+  - data/meteor_2016to20_NY.csv
 ---
-
-```{r}
-message("THIS FILE IS BEING RENDERED: ", normalizePath("shiny_MeteorSumm.Rmd"))
-```
 
 ```{r setup}
 library(flexdashboard)
@@ -27,9 +23,9 @@ library(viridis)
 ```
 
 ```{r data import, message = FALSE}
-NYcounty <- sf::read_sf("df_gen/data/NYcounty_fips/NYcounty_fips.shp") 
+NYcounty <- sf::read_sf("data/NYcounty_fips/NYcounty_fips.shp") 
 
-meteor_r <- read_csv("df_gen/data/meteor_2016to20_NY.csv") |>
+meteor_r <- read_csv("data/meteor_2016to20_NY.csv") |>
   mutate(
     year = year(date),
     tmmn_c = tmmn - 273.15,
