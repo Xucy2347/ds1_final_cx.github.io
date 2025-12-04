@@ -10,7 +10,7 @@ resource_files:
   - df_gen/data/meteor_2016to20_NY.csv
 ---
 
-```{r setup}
+```{r setup, include=FALSE}
 library(flexdashboard)
 library(leaflet)
 library(mapview)
@@ -63,8 +63,7 @@ meteor_summ_yr = meteor_r |>
   )
 ```
 
-Filters {.sidebar}
------------------------------------------------------------------------
+## Filters {.sidebar}
 
 ```{r var_choice}
 
@@ -76,10 +75,9 @@ radioButtons(
   choices = vars,
   selected = "Maximum Near-Surface Air Temperature (C)"
 )
-
 ```
 
-```{r year_range}
+```{r}
 min_year = meteor_summ_yr |> distinct(year) |> min()  # 2016
 max_year = meteor_summ_yr |> distinct(year) |> max()  # 2020
 
@@ -92,10 +90,10 @@ sliderInput(
 )
 ```
 
-Column {data-width=550}
------------------------------------------------------------------------
+## Column {data-width="550"}
 
 ### Mean Meteorological Values by county in NY state within the chosen years
+
 ```{r}
 renderPlotly({
 
@@ -139,9 +137,10 @@ renderPlotly({
 })
 ```
 
-Column {data-width=450}
------------------------------------------------------------------------
+## Column {data-width="450"}
+
 ### Mean Meteorological Values across NY state for each day within the chosen years
+
 ```{r}
 renderPlotly({
 
@@ -180,4 +179,3 @@ renderPlotly({
 ```{r}
 
 ```
-
