@@ -23,7 +23,9 @@ library(viridis)
 ```
 
 ```{r data import, message = FALSE}
-NYcounty <- sf::read_sf("data/NYcounty_fips/NYcounty_fips.shp") 
+NYcounty_sf <- sf::read_sf("data/NYcounty_fips/NYcounty_fips.shp") 
+
+NYcounty_df = NYcounty_sf |> st_drop_geometry()
 
 meteor_r <- read_csv("data/meteor_2016to20_NY.csv") |>
   mutate(
@@ -109,12 +111,16 @@ renderPlotly({
     summarise(
       mean_value = mean(mean_value)
     ) |>
-    left_join(NYcounty, by = "fips") |>
+    left_join(NYcounty_sf, by = "fips") |>
     st_as_sf()
   
-  ggplotly(
-    ggplot(meteor_sf, color = rgb(0.95, 0.95, 0.95, alpha = 0.3), size = 0.1) +
-    geom_sf(aes(fill = mean_value), alpha = 0.8) +
+  map = 
+    ggplot(meteor_sf) +
+    geom_sf(aes(fill = mean_value,
+                text = str_c(namelsad, ": ", round(mean_value, 2))),
+            color = rgb(0.95, 0.95, 0.95, alpha = 0.3), 
+            size = 0.1,
+            alpha = 0.8) +
     scale_fill_viridis_c(
       name = NULL,
       option = if_else(
@@ -127,15 +133,11 @@ renderPlotly({
     labs(
       x = NULL,
       y = NULL
-  ) +
-  theme_minimal() +
-    theme(
-      plot.title = element_text(
-        hjust = 0.5,
-        margin = margin(b = 5)
-      )
-    )
-  )
+    ) +
+    theme_minimal()
+  
+  ggplotly(map, tooltip = "text") |>
+    style(hoveron = "fills")
 })
 ```
 
@@ -177,8 +179,50 @@ renderPlotly({
 ```
 
 
-### Chart C
+### Variable Distribution
 
 ```{r}
-
+renderPlotly({
+  
+  meteor_season = meteor_r |>
+    filter(
+      var.char == input[["var_choice"]],
+      year >= input[["yr_range"]][1],
+      year <= input[["yr_range"]][2]
+    ) |>
+    mutate(
+      mth = month(date),
+      season = case_when(
+        mth %in% 3:5 ~ 1,
+        mth %in% 6:8 ~ 2,
+        mth %in% 9:11 ~ 3,
+        mth %in% c(1, 2, 12) ~ 4
+      ),
+      season = factor(
+        season,
+        levels = c(1:4),
+        labels = c("Spring", "Summer", "Autumn", "Winter")
+      )
+    ) |> 
+    arrange(season) |>
+    left_join(NYcounty_df, by = "fips") 
+  
+  ggplotly(
+    ggplot(meteor_season, 
+           aes(x = value,
+               fill = season)) +
+    geom_density(alpha = 0.5) +
+    labs(
+      x = input[["var_choice"]]
+    ) +
+    theme_minimal()
+  )
+  
+})
 ```
+
+```{r}
+# library(rsconnect)
+# rsconnect::deployApp('dashboard')
+```
+
