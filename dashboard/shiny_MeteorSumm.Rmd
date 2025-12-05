@@ -7,8 +7,8 @@ output:
     vertical_layout: fill
 runtime: shiny
 resource_files:
-  - data/NYcounty_fips/*
-  - data/meteor_2016to20_NY.csv
+  - dashboard/data/NYcounty_fips/*
+  - dashboard/data/meteor_2016to20_NY.csv
 ---
 
 ```{r setup}
@@ -20,14 +20,15 @@ library(sf)
 library(tidyverse)
 library(shiny)
 library(viridis)
+library(here)
 ```
 
 ```{r data import, message = FALSE}
-NYcounty_sf <- sf::read_sf("data/NYcounty_fips/NYcounty_fips.shp") 
+NYcounty_sf <- sf::read_sf(here::here("dashboard", "data", "NYcounty_fips", "NYcounty_fips.shp"))
 
 NYcounty_df = NYcounty_sf |> st_drop_geometry()
 
-meteor_r <- read_csv("data/meteor_2016to20_NY.csv") |>
+meteor_r <- read_csv(here::here("dashboard", "data", "meteor_2016to20_NY.csv")) |>
   mutate(
     year = year(date),
     tmmn_c = tmmn - 273.15,
@@ -109,23 +110,23 @@ renderPlotly({
     ) |> 
     group_by(fips) |>
     summarise(
-      mean_value = mean(mean_value)
+      mean_value = mean(mean_value),
+      .groups = "drop"
     ) |>
     left_join(NYcounty_sf, by = "fips") |>
     st_as_sf()
   
-  map = 
-    ggplot(meteor_sf) +
-    geom_sf(aes(fill = mean_value,
-                text = str_c(namelsad, ": ", round(mean_value, 2))),
-            color = rgb(0.95, 0.95, 0.95, alpha = 0.3), 
+  map = meteor_sf |>
+    ggplot() +
+    geom_sf(aes(fill = mean_value, text = str_c(namelsad, ": ", round(mean_value, 2))),
+            color = rgb(0.95, 0.95, 0.95, alpha = 0.3),
             size = 0.1,
             alpha = 0.8) +
     scale_fill_viridis_c(
       name = NULL,
       option = if_else(
-          str_detect(input[["var_choice"]], "Max|Solar"), 
-          "plasma", 
+          str_detect(input[["var_choice"]], "Max|Solar"),
+          "plasma",
           "mako"
         ),
       na.value = "grey80"
@@ -135,10 +136,10 @@ renderPlotly({
       y = NULL
     ) +
     theme_minimal()
-  
-  ggplotly(map, tooltip = "text") |>
-    style(hoveron = "fills")
+
+  ggplotly(map, tooltip = "text") |> style(hoveron = "fills")
 })
+
 ```
 
 Column {data-width=450}
