@@ -24,11 +24,11 @@ library(here)
 ```
 
 ```{r data import, message = FALSE}
-NYcounty_sf <- sf::read_sf(here::here("dashboard", "data", "NYcounty_fips", "NYcounty_fips.shp"))
+NYcounty_sf <- sf::read_sf(here::here("data", "NYcounty_fips", "NYcounty_fips.shp"))
 
 NYcounty_df = NYcounty_sf |> st_drop_geometry()
 
-meteor_r <- read_csv(here::here("dashboard", "data", "meteor_2016to20_NY.csv")) |>
+meteor_r <- read_csv(here::here("data", "meteor_2016to20_NY.csv")) |>
   mutate(
     year = year(date),
     tmmn_c = tmmn - 273.15,
